@@ -31,7 +31,7 @@
     ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, BasemapGallery) {
         esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurEgdsxN_WfCGs2RqOrNfQW8VulJDY0K9jA0e0QITBUrY6ze4iDm7gGrfnir2Ri5GHwWzw-WqgzUMlQ-Q9B0fa0lpK0zbqoc2sktDyFVJfcEI6nPQn1EnBLvQZAKKvogpUvf9uM-v-c9Ov6xOB18dTpZFTVu-TYgfxLZT3XeGw3kBB2a2F7bO9FIIDUWl8F4ddrvfZVaoA5a5DNk-s3FZKxCTQU90Oj9gImN0eqJvrLprAT1_eMwue8gT";
         const map = new Map({
-          basemap: "arcgis-nova" // Basemap layer service
+          basemap: "arcgis-streets" // Basemap layer service
         });
 
         const view = new MapView({
@@ -160,7 +160,7 @@
         //adding the feature layer to the map
         map.add(usaeduLayer);
 
-        // Define custom airport renderer with picture marker
+        // Define custom airport renderer with picture marker - need to modify PNG or use different approach
         const airportRenderer = {
           "type": "simple",
           "symbol": {
@@ -199,6 +199,50 @@
           labelingInfo: [airportLabels] //adding the labels
         });
         map.add(airportLayer);
+
+        // Define custom heliport renderer with helicopter icon
+        const heliportRenderer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://raw.githubusercontent.com/Dboldt-UWMAD/agol/main/h_mobiledata_24dp_1F1F1F.png",
+            "width": "18px",
+            "height": "18px",
+            "outline": {
+              "color": [255, 255, 255, 0.9],
+              "width": 3
+            }
+          }
+        }
+
+        // const to make the heliport labels
+        const heliportLabels = {
+          symbol: {
+            type: "text",
+            color: "#FFFFFF",
+            haloColor: "#8D5E74",
+            haloSize: "2px",
+            font: {
+              size: "12px",
+              family: "Noto Sans",
+              style: "italic",
+              weight: "normal"
+            }
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Fac_Name"
+          }
+        };
+
+        // Create heliport FeatureLayer with custom renderer
+        const heliportLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
+          renderer: heliportRenderer, //calling the helicopter icon
+          definitionExpression: "Fac_Type = 'HELIPORT'", //adding sql to filter for heliports
+          labelingInfo: [heliportLabels] //adding the labels
+        });
+        map.add(heliportLayer);
 
         view.when(function() {
           // Add basemap gallery widget
