@@ -116,10 +116,36 @@
         });
         graphicsLayer.add(triangle);
 
-        // Define a pop-up for usaeduLayer
+        // Define a rich pop-up for usaeduLayer
         const popupEduusa = {
-          "title": "EDUs",
-          "content": "<b>Name:</b> {INSTNM}<br><b>Total Enrollment:</b> {TOT_ENROLL}<br>"
+          "title": "🎓 {INSTNM}",
+          "content": `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+              <div style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; margin: -10px -10px 15px -10px; border-radius: 5px;">
+                <h3 style="margin: 0; text-align: center;">📚 Institution Details</h3>
+              </div>
+              
+              <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                <strong>🏫 Institution Name:</strong><br>
+                <span style="color: #2c3e50; font-size: 16px;">{INSTNM}</span>
+              </div>
+              
+              <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                <strong>🌐 Website:</strong><br>
+                <a href="{WEBADDR}" target="_blank" style="color: #0066cc; text-decoration: none;">Visit Institution Website →</a>
+              </div>
+              
+              <div style="background-color: #d4edda; padding: 10px; border-radius: 5px;">
+                <strong>📍 Location:</strong><br>
+                <span style="color: #155724;">{CITY}, {STABBR}</span>
+              </div>
+              
+              <hr style="margin: 15px 0; border: none; border-top: 2px solid #eee;">
+              <div style="text-align: center; font-size: 12px; color: #6c757d;">
+                <em>Click on other institutions to explore more colleges and universities!</em>
+              </div>
+            </div>
+          `
         }
 
         //adding the Const for the feature layer
@@ -127,12 +153,31 @@
           url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer/0",
 
           //adding the popup here
-          outFields: ["INSTNM","TOT_ENROLL"],
+          outFields: ["INSTNM","WEBADDR","CITY","STABBR"],
           popupTemplate: popupEduusa
         });
 
         //adding the feature layer to the map
         map.add(usaeduLayer);
+
+        // Define custom airport renderer with picture marker
+        const airportRenderer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://raw.githubusercontent.com/Dboldt-UWMAD/agol/main/local_airport_24dp_1F1F1F.png",
+            "width": "18px",
+            "height": "18px"
+          }
+        }
+
+        // Create airport FeatureLayer with custom renderer
+        const airportLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports/FeatureServer",
+          renderer: airportRenderer, //calling the icon
+          definitionExpression: "Fac_Type = 'AIRPORT'" //adding sql to filter for airports
+        });
+        map.add(airportLayer);
 
         view.when(function() {
           // Add basemap gallery widget
