@@ -15,13 +15,20 @@
 
 
   <script>
-    window.onload = function() {
-      require([
-        "esri/config",
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/widgets/BasemapGallery"
-      ], function(esriConfig, Map, MapView, BasemapGallery) {
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      
+      // adding in the modules for the graphic and graphic layer
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      
+      //adding in the module for the feature layers
+      "esri/layers/FeatureLayer",
+      
+      "esri/widgets/BasemapGallery"
+    ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, BasemapGallery) {
         esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurEgdsxN_WfCGs2RqOrNfQW8VulJDY0K9jA0e0QITBUrY6ze4iDm7gGrfnir2Ri5GHwWzw-WqgzUMlQ-Q9B0fa0lpK0zbqoc2sktDyFVJfcEI6nPQn1EnBLvQZAKKvogpUvf9uM-v-c9Ov6xOB18dTpZFTVu-TYgfxLZT3XeGw3kBB2a2F7bO9FIIDUWl8F4ddrvfZVaoA5a5DNk-s3FZKxCTQU90Oj9gImN0eqJvrLprAT1_eMwue8gT";
         const map = new Map({
           basemap: "arcgis-nova" // Basemap layer service
@@ -34,7 +41,101 @@
           container: "viewDiv" // Div element
         });
 
+        const graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer);
+
+        // Define popup template and attributes first
+        const popupTemplate = {
+          title: "{Name}",
+          content: "{Description}"
+        }
+        const attributes = {
+          Name: "Stevie Ray Vaughan Statue",
+          Description: "A bronze sculpture of Stevie Ray Vaughan by Ralph Helmick"
+        }
+
+        // Create a simple Chicago point (triangle)
+        const chicagoPoint = new Graphic({
+          geometry: {
+            type: "point",
+            longitude: -87.6298,
+            latitude: 41.8781
+          },
+          symbol: {
+            type: "simple-marker",
+            style: "triangle",
+            color: [255, 0, 0],
+            size: 20,
+            outline: {
+              color: [255, 255, 255],
+              width: 2
+            }
+          },
+          attributes: attributes,
+          popupTemplate: popupTemplate
+        });
+
+        graphicsLayer.add(chicagoPoint);
+
+        // Create a polyline
+        const polyline = new Graphic({
+          geometry: {
+            type: "polyline",
+            paths: [
+              [-87.630388, 41.902357],  // First point
+              [-87.61035998597549, 41.86602498830019]  // Second point
+            ]
+          },
+          symbol: {
+            type: "simple-line",
+            color: [0, 100, 255],  // Blue line
+            width: 3
+          }
+        });
+        graphicsLayer.add(polyline);
+
+        // Create a triangle polygon
+        const triangle = new Graphic({
+          geometry: {
+            type: "polygon",
+            rings: [
+              [-87.65676055362589, 41.87812632143676],  // First point
+              [-87.66105208773384, 41.870137490957745], // Second point
+              [-87.64534507263971, 41.87582564064402],  // Third point
+              [-87.65676055362589, 41.87812632143676]   // Close the polygon (back to first point)
+            ]
+          },
+          symbol: {
+            type: "simple-fill",
+            color: [138, 43, 226, 0.6],  // Purple with transparency
+            outline: {
+              color: [75, 0, 130],  // Dark purple outline
+              width: 2
+            }
+          }
+        });
+        graphicsLayer.add(triangle);
+
+        // Define a pop-up for usaeduLayer
+        const popupEduusa = {
+          "title": "EDUs",
+          "content": "<b>Name:</b> {INSTNM}<br><b>Total Enrollment:</b> {TOT_ENROLL}<br>"
+        }
+
+        //adding the Const for the feature layer
+        const usaeduLayer = new FeatureLayer({
+          url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer/0",
+
+          //adding the popup here
+          outFields: ["INSTNM","TOT_ENROLL"],
+          popupTemplate: popupEduusa
+        });
+
+        //adding the feature layer to the map
+        map.add(usaeduLayer);
+
         view.when(function() {
+          // Add basemap gallery widget
           const basemapGallery = new BasemapGallery({
             view: view
           });
@@ -63,7 +164,6 @@
           });
         });
       });
-    };
   </script>
 
 
